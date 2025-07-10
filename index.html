@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Silent Hill 2 - Заброшенная больница</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Special+Elite&display=swap');
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: #e0e0e0;
+            font-family: 'Special Elite', cursive;
+            overflow: hidden;
+            height: 100vh;
+            transition: background 1s;
+        }
+        .container {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            background: 
+                url('https://i.playground.ru/e/E9TuD1qPXIEqRaC2Hx3Rfw.jpeg') center/cover,
+                linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7));
+            filter: sepia(0.3) brightness(0.6) contrast(1.2);
+            overflow: hidden;
+            transition: background 1s;
+        }
+        .container.bg-removed {
+            background: #000 !important;
+        }
+        .content {
+            position: relative;
+            z-index: 10;
+            width: 80%;
+            max-width: 600px;
+            margin: 10vh auto 0;
+            padding: 2rem;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #5a0000;
+            box-shadow: 0 0 20px rgba(150,0,0,0.5);
+            text-align: center;
+        }
+        h1 {
+            color: #c00;
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px #f00;
+            margin-bottom: 1.5rem;
+            letter-spacing: 2px;
+        }
+        p {
+            color: #aaa;
+            font-size: 1.2rem;
+            line-height: 1.5;
+            margin-bottom: 2rem;
+        }
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+        input {
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid #5a0000;
+            color: #d3d3d3;
+            padding: 0.8rem;
+            font-family: 'Special Elite', cursive;
+            width: 100%;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+        button {
+            background: #5a0000;
+            color: #d3d3d3;
+            border: none;
+            padding: 0.8rem 2rem;
+            font-family: 'Special Elite', cursive;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        button:hover {
+            background: #8a0000;
+            box-shadow: 0 0 15px #f00;
+        }
+        .error {
+            color: #f00;
+            font-size: 1rem;
+            margin-top: 1rem;
+            display: none;
+        }
+        .success {
+            color: #0f0;
+            font-size: 1.2rem;
+            margin-top: 1rem;
+            display: none;
+        }
+        .sound-control {
+            position: fixed;
+            right: 2vw;
+            bottom: 2vh;
+            font-size: 2.5rem;
+            z-index: 99;
+            cursor: pointer;
+            background: rgba(0,0,0,0.5);
+            border-radius: 100px;
+            padding: 0.3em 0.5em;
+            transition: opacity 0.2s;
+        }
+        .sound-control.muted {
+            opacity: 0.5;
+        }
+        #secret-message {
+            display: none;
+            margin: 2rem auto 0;
+            padding: 1.5rem 1rem;
+            background: rgba(20,0,0,0.85);
+            color: #fff;
+            border: 1px solid #a00;
+            box-shadow: 0 0 25px #900a;
+            font-size: 1.2rem;
+            white-space: pre-line;
+            min-height: 120px;
+            font-family: 'Special Elite', cursive;
+            max-width: 600px;
+            text-align: left;
+        }
+        .subscribe-prompt {
+            display: none;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: rgba(20,0,0,0.9);
+            border: 1px solid #a00;
+            box-shadow: 0 0 25px #900a;
+            color: #fff;
+            font-size: 1.1rem;
+            text-align: center;
+        }
+        .subscribe-prompt a {
+            color: #f88;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        .subscribe-prompt a:hover {
+            color: #f00;
+            text-shadow: 0 0 5px #f00;
+        }
+        .glitch-effect {
+            animation: glitch 1s linear infinite;
+        }
+        @keyframes glitch {
+            0% { transform: translate(0) }
+            20% { transform: translate(-3px, 3px) }
+            40% { transform: translate(-3px, -3px) }
+            60% { transform: translate(3px, 3px) }
+            80% { transform: translate(3px, -3px) }
+            100% { transform: translate(0) }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="main-container">
+        <div class="content">
+            <h1>SILENT HILL 2</h1>
+            <p>Ты нашел вход в заброшенную больницу. Введи коды, чтобы продолжить...</p>
+            <div class="input-group">
+                <input type="text" id="code1" placeholder="Код 1" maxlength="4">
+                <input type="text" id="code2" placeholder="Код 2" maxlength="6">
+            </div>
+            <button onclick="checkCodes()">ПОДТВЕРДИТЬ</button>
+            <p class="error" id="error">Неверные коды. Попробуй ещё раз.</p>
+            <p class="success" id="success">Доступ разрешён. Иди дальше...</p>
+            <div id="secret-message"></div>
+            <div class="subscribe-prompt" id="subscribe-prompt"></div>
+        </div>
+    </div>
+
+    <!-- Аудио элементы -->
+    <audio id="backgroundAudio" loop>
+        <source src="/silenthill/wp-content/themes/silenthill/sirena-iz-fil-ma-saylent-hill-bez-nazvaniya.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="errorSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="successSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-achievement-bell-600.mp3" type="audio/mpeg">
+    </audio>
+    <!-- Спецэффекты -->
+    <audio id="whisperSound">
+        <source src="https://cdn.pixabay.com/audio/2022/10/16/audio_12e3b0b0c1.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="heartbeatSound">
+        <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_114b6fae15.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="screamSound">
+        <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_113be9e8e2.mp3" type="audio/mpeg">
+    </audio>
+    <div class="sound-control" title="Включить/выключить звук">🔊</div>
+
+    <script>
+        // Инициализация аудио
+        const bgAudio = document.getElementById('backgroundAudio');
+        const errorSound = document.getElementById('errorSound');
+        const successSound = document.getElementById('successSound');
+        const whisperSound = document.getElementById('whisperSound');
+        const heartbeatSound = document.getElementById('heartbeatSound');
+        const screamSound = document.getElementById('screamSound');
+        const soundControl = document.querySelector('.sound-control');
+        const secretMessage = document.getElementById('secret-message');
+        const subscribePrompt = document.getElementById('subscribe-prompt');
+        const mainContainer = document.getElementById('main-container');
+
+        const sounds = {
+            whisper: whisperSound,
+            heartbeat: heartbeatSound,
+            scream: screamSound,
+            success: successSound,
+            error: errorSound,
+            bg: bgAudio
+        };
+
+        function tryPlayBg() {
+            if (bgAudio.paused) {
+                bgAudio.volume = 0.3;
+                bgAudio.play().catch(e => console.log("Autoplay prevented:", e));
+            }
+        }
+
+        // Универсальный запуск звука при любом действии
+        ['click', 'keydown', 'touchstart'].forEach(eventType => {
+            document.addEventListener(eventType, function initAudio() {
+                tryPlayBg();
+                ['click', 'keydown', 'touchstart'].forEach(type => {
+                    document.removeEventListener(type, initAudio);
+                });
+            }, { once: true });
+        });
+
+        // Управление звуком
+        soundControl.addEventListener('click', () => {
+            if (bgAudio.paused) {
+                tryPlayBg();
+                soundControl.classList.remove('muted');
+            } else {
+                bgAudio.pause();
+                soundControl.classList.add('muted');
+            }
+        });
+
+        // Пишущий эффект с колбеком по завершению
+        function typeWriter(text, speed, onComplete) {
+            secretMessage.textContent = '';
+            let i = 0;
+            function type() {
+                if (i < text.length) {
+                    secretMessage.textContent += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                } else if (typeof onComplete === 'function') {
+                    onComplete();
+                }
+            }
+            type();
+        }
+
+        function showSubscribePrompt() {
+            const promptText = "Ты нашел секрет...\n\nНо история продолжается.\nПодпишись на наш канал, чтобы узнать больше тайн Сайлент Хилла:\n\n<a href='https://www.youtube.com/channel/UCBSON6k6txOPGW4XzqHXSsQ' target='_blank' class='glitch-effect'>ВОЙТИ В ТЕМНУЮ СТОРОНУ</a>";
+            subscribePrompt.innerHTML = promptText;
+            subscribePrompt.style.display = 'block';
+            
+            // Анимация мигания
+            setInterval(() => {
+                subscribePrompt.classList.toggle('glitch-effect');
+            }, 3000);
+        }
+
+        function checkCodes() {
+            tryPlayBg();
+            const code1 = document.getElementById('code1').value.trim().toUpperCase();
+            const code2 = document.getElementById('code2').value.trim().toUpperCase();
+            const error = document.getElementById('error');
+            const success = document.getElementById('success');
+
+            // Правильные коды
+            if (code1 === "SH2" && code2 === "MARY") {
+                error.style.display = 'none';
+                success.style.display = 'none';
+                secretMessage.style.display = 'block';
+
+                // Анимация печатающегося текста
+                const message = "Дорогой Джеймс...\n\nЯ все еще здесь, в комнате 312.\nТы обещал вернуться. Почему ты заставил меня ждать?\n\nОна лжет тебе. Я настоящая.\n\n- Твоя Мэри";
+                typeWriter(message, 50, () => {
+                    // Показываем предложение подписаться сразу после завершения печати
+                    showSubscribePrompt();
+                });
+
+                // Звуковые эффекты
+                setTimeout(() => sounds.whisper.play(), 1000);
+                setTimeout(() => sounds.heartbeat.play(), 3000);
+                setTimeout(() => {
+                    sounds.scream.play();
+                }, 6000);
+
+            } else {
+                error.style.display = 'block';
+                success.style.display = 'none';
+                secretMessage.style.display = 'none';
+                subscribePrompt.style.display = 'none';
+                errorSound.currentTime = 0;
+                errorSound.play();
+
+                // Эффект при ошибке
+                document.body.style.transform = "translateX(5px)";
+                setTimeout(() => {
+                    document.body.style.transform = "translateX(-5px)";
+                }, 100);
+                setTimeout(() => {
+                    document.body.style.transform = "translateX(0)";
+                }, 200);
+            }
+        }
+
+        // ENTER активирует ввод кодов
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                checkCodes();
+            }
+        });
+    </script>
+</body>
+</html>
